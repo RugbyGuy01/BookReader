@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">BookReader</string>
+    <string name="create_acct"> Please enter a valid email accont and password that is at least</string>
+</resources>

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "221300903389",
+    "project_id": "jetareader-5dc37",
+    "storage_bucket": "jetareader-5dc37.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:221300903389:android:3e1121efffe20d87053a34",
+        "android_client_info": {
+          "package_name": "com.golfpvcc.bookreader"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "221300903389-p7ueq3d1lf7r7psgq6334elge5kepqfl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAL-GdWuf0bt5JIEwaAtbRgDw73RwrCRZ0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "221300903389-p7ueq3d1lf7r7psgq6334elge5kepqfl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
