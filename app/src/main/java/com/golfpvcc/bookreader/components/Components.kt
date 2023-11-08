@@ -1,6 +1,6 @@
 package com.golfpvcc.bookreader.components
 
-import android.graphics.drawable.Icon
+
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
@@ -86,7 +86,6 @@ fun InputField(
         keyboardActions = onAction
     )
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

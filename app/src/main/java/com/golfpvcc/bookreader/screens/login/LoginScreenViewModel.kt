@@ -1,10 +1,10 @@
 /*
 Email - SoPi@golfpvcc.com  Password Magaww
+        Vgamble@golfpvcc.com  Password Magaww
  */
 package com.golfpvcc.bookreader.screens.login
 
 import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -21,7 +21,7 @@ class LoginScreenViewModel : ViewModel() {
     private val _loading = MutableLiveData(false)
     val loading: LiveData<Boolean> = _loading
 
-    fun signInWithEmailAndPassword(email: String, password: String) = viewModelScope.launch {
+    fun signInWithEmailAndPassword(email: String, password: String, home: () -> Unit) = viewModelScope.launch {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -35,21 +35,23 @@ class LoginScreenViewModel : ViewModel() {
             }
     }
 
-    fun createUserWithEmailAndPassword() {
+    fun createUserWithEmailAndPassword(
+        email: String,
+        password: String,
+        home: () -> Unit
+    ) {
 
+        if (_loading.value == false) {
+            _loading.value = true
+            auth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        home()
+                    } else {
+                        Log.d("VIN", "CreateUserWithEmailANd Password: $(task.result.toString()}")
+                    }
+                    _loading.value = false
+                }
+        }
     }
-//    try {
-//        auth.signInWithEmailAndPassword(email, password)
-//            .addOnCompleteListener { task ->
-//                if (task.isSuccessful) {
-//                    Log.d("VIN", "Log in is Successful ")
-//                    // to do take them to the home screen
-//                } else {
-//                    Log.d("VIN", "signInWithEmailAndPassword ${task.result.toString()}")
-//                }
-//            }
-//    } catch (ex: Exception) {
-//        Log.d("Vin", "signInWithEmailAndPassword ${ex.message}")
-//    }
-
 }

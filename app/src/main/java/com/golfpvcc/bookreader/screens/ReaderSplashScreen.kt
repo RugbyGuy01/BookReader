@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.golfpvcc.bookreader.components.ReaderLogo
 import com.golfpvcc.bookreader.navigation.ReaderScreens
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 
 @Composable
@@ -46,6 +47,7 @@ fun ReaderSplashScreen(navController: NavController) {
                 })
         )
         delay(2000L)
+
         navController.navigate(ReaderScreens.LoginScreen.name)
     }
 
