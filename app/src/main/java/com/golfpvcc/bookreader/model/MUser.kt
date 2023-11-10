@@ -12,9 +12,9 @@ data class MUser(
         return mutableMapOf(
             "user_id" to this.userId,
             "display_name" to this.displayName,
+            "avater_url" to this.avatarUrl,
             "quote" to this.quote,
-            "profession" to this.profession,
-            "avater_url" to this.avatarUrl
+            "profession" to this.profession
         )
     }
 }
