@@ -1,5 +1,6 @@
 package com.golfpvcc.bookreader.screens
 
+import android.util.Log
 import android.view.animation.OvershootInterpolator
 import androidx.compose.animation.Animatable
 import androidx.compose.animation.core.tween
@@ -47,13 +48,13 @@ fun ReaderSplashScreen(navController: NavController) {
                 })
         )
         delay(2000L)
-
-        if (FirebaseAuth.getInstance().currentUser?.email.isNullOrEmpty())
+        var LogInStatus = FirebaseAuth.getInstance().currentUser?.email.isNullOrEmpty()
+        if (LogInStatus )
             navController.navigate(ReaderScreens.LoginScreen.name)
         else
             navController.navigate(ReaderScreens.ReaderHomeScreen.name)
     }
-    
+
     Surface(
         modifier = Modifier
             .padding(15.dp)

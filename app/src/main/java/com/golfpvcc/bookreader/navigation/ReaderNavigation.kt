@@ -22,6 +22,10 @@ fun ReaderNavigation() {
         composable(ReaderScreens.LoginScreen.name){
             ReaderLoginScreen(navController = navController)
         }
+        composable(ReaderScreens.ReaderStatsScreen.name){
+            ReaderStatsScreen(navController = navController)
+        }
+
         composable(ReaderScreens.ReaderHomeScreen.name){
             Home(navController = navController)
         }
