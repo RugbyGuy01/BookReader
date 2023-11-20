@@ -32,8 +32,8 @@ fun ReaderNavigation() {
             Home(navController = navController)
         }
         composable(ReaderScreens.SearchScreen.name){
-            val viewModel = hiltViewModel<BookSearchViewModel>()
-            SearchScreen(navController = navController, viewModel)
+            val searchViewModel = hiltViewModel<BookSearchViewModel>()
+            SearchScreen(navController = navController, searchViewModel)
         }
         composable(ReaderScreens.DetailScreen.name){
             BookDetailsScreen(navController = navController)
