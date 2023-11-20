@@ -4,6 +4,7 @@ package com.golfpvcc.bookreader.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -41,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
@@ -134,7 +136,8 @@ fun PasswordInput(
     val visualTransformation = if (passwordVisibility.value) VisualTransformation.None else
         PasswordVisualTransformation()
 
-    OutlinedTextField(value = passwordState.value,
+    OutlinedTextField(
+        value = passwordState.value,
         onValueChange = { passwordState.value = it },
         label = { Text(text = labelId) },
         singleLine = true,
@@ -145,17 +148,22 @@ fun PasswordInput(
         enabled = enabled,
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Password,
-            imeAction = imeAction),
+            imeAction = imeAction
+        ),
         visualTransformation = visualTransformation,
         trailingIcon = { PasswordVisibility(passwordVisibility = passwordVisibility) },
-        keyboardActions = onAction)
+        keyboardActions = onAction
+    )
 }
 
 @Composable
 fun PasswordVisibility(passwordVisibility: MutableState<Boolean>) {
     val visible = passwordVisibility.value
     IconButton(onClick = { passwordVisibility.value = !visible }) {
-        androidx.compose.material3.Icon(imageVector = Icons.Default.Close, contentDescription = null)
+        androidx.compose.material3.Icon(
+            imageVector = Icons.Default.Close,
+            contentDescription = null
+        )
     }
 }
 
@@ -180,8 +188,10 @@ fun TitleSection(
 @Composable
 fun ReaderAppBar(
     title: String,
+    icon: ImageVector? = null,
     showProfile: Boolean = true,
-    navController: NavController
+    navController: NavController,
+    onBackArrowClicked: () -> Unit = {}
 ) {
     TopAppBar(
         title = {
@@ -195,6 +205,12 @@ fun ReaderAppBar(
                             .scale(scale = 0.9f)
                     )
                 }
+                if(icon != null){
+                    Icon(imageVector = icon, contentDescription = "Arror Back",
+                        tint = Color.Red.copy(0.7f),
+                        modifier = Modifier.clickable { onBackArrowClicked.invoke() })
+                }
+                Spacer(modifier = Modifier.width(40.dp))
                 Text(
                     text = title,
                     color = Color.Red.copy(alpha = 0.7f),
@@ -203,7 +219,6 @@ fun ReaderAppBar(
                         fontSize = 20.sp
                     )
                 )
-                Spacer(modifier = Modifier.width(150.dp))
             }
         },
         actions = {
@@ -212,10 +227,14 @@ fun ReaderAppBar(
                     navController.navigate(ReaderScreens.LoginScreen.name)
                 }
             }) {
-                Icon(
-                    Icons.Default.Close, contentDescription = null,
-                    tint = Color.Green.copy(alpha = 0.4f)
-                )        // log out Icon
+                if(showProfile) Row{
+                    Icon(
+                        Icons.Default.Close, contentDescription = "Log Out",
+                        tint = Color.Green.copy(alpha = 0.4f)
+                    )        // log out Icon
+                } else {
+                    Box {}
+                }
             }
         },
         colors = TopAppBarDefaults.mediumTopAppBarColors(
@@ -224,6 +243,7 @@ fun ReaderAppBar(
         )
     )
 }
+
 @Composable
 fun ListCard(
     book: MBook = MBook(
@@ -254,7 +274,8 @@ fun ListCard(
             .clickable { onPressDetail.invoke(book.title.toString()) }
     ) {
         Column(
-            modifier = Modifier.width(screenWidth.dp - (spacing * 2))
+            modifier = Modifier
+                .width(screenWidth.dp - (spacing * 2))
                 .fillMaxHeight(),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Bottom //?
@@ -283,7 +304,7 @@ fun ListCard(
                 } // end column
             }   // end row first row - picture and rating
             Text(
-                text = book .title.toString(), modifier = Modifier.padding(4.dp),
+                text = book.title.toString(), modifier = Modifier.padding(4.dp),
                 fontWeight = FontWeight.Bold,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis    //...
@@ -303,24 +324,38 @@ fun ListCard(
         }
     }
 }
+
 @Composable
 fun RoundedButton(
     label: String = "Reading",
     radius: Int = 29,
-    onPress: () -> Unit = {}) {
-    Surface(modifier = Modifier.clip(RoundedCornerShape(
-        bottomEndPercent = radius,
-        topStartPercent = radius)),
-        color = Color(0xFF92CBDF)) {
+    onPress: () -> Unit = {}
+) {
+    Surface(
+        modifier = Modifier.clip(
+            RoundedCornerShape(
+                bottomEndPercent = radius,
+                topStartPercent = radius
+            )
+        ),
+        color = Color(0xFF92CBDF)
+    ) {
 
-        Column(modifier = Modifier
-            .width(90.dp)
-            .heightIn(40.dp)
-            .clickable { onPress.invoke() },
+        Column(
+            modifier = Modifier
+                .width(90.dp)
+                .heightIn(40.dp)
+                .clickable { onPress.invoke() },
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = label, style = TextStyle(color = Color.White,
-                fontSize = 15.sp),)
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = label,
+                style = TextStyle(
+                    color = Color.White,
+                    fontSize = 15.sp
+                ),
+            )
 
         }
 
@@ -341,6 +376,7 @@ fun FABContent(onTap: () -> Unit) {
         )
     }
 }
+
 @Composable
 fun BookRating(score: Double = 4.5) {
     Surface(

@@ -1,6 +1,7 @@
 package com.golfpvcc.bookreader.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -8,6 +9,7 @@ import com.golfpvcc.bookreader.screens.ReaderSplashScreen
 import com.golfpvcc.bookreader.screens.details.BookDetailsScreen
 import com.golfpvcc.bookreader.screens.home.Home
 import com.golfpvcc.bookreader.screens.login.ReaderLoginScreen
+import com.golfpvcc.bookreader.screens.search.BookSearchViewModel
 import com.golfpvcc.bookreader.screens.search.SearchScreen
 import com.golfpvcc.bookreader.screens.stats.ReaderStatsScreen
 import com.golfpvcc.bookreader.screens.update.BookUpdateScreen
@@ -15,7 +17,7 @@ import com.golfpvcc.bookreader.screens.update.BookUpdateScreen
 @Composable
 fun ReaderNavigation() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = ReaderScreens.SplashScreen.name ){
+    NavHost(navController = navController, startDestination = ReaderScreens.ReaderHomeScreen.name ){
         composable(ReaderScreens.SplashScreen.name){
             ReaderSplashScreen(navController = navController)
         }
@@ -30,7 +32,8 @@ fun ReaderNavigation() {
             Home(navController = navController)
         }
         composable(ReaderScreens.SearchScreen.name){
-            SearchScreen(navController = navController)
+            val viewModel = hiltViewModel<BookSearchViewModel>()
+            SearchScreen(navController = navController, viewModel)
         }
         composable(ReaderScreens.DetailScreen.name){
             BookDetailsScreen(navController = navController)

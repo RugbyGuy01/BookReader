@@ -66,7 +66,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.golfpvcc.bookreader.model.MBook as MBook
 
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+//@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Home(navController: NavController = NavController(LocalContext.current)) {
@@ -115,7 +115,9 @@ fun Home(navController: NavController = NavController(LocalContext.current)) {
             )
         )
     }, floatingActionButton = {
-        FABContent {}
+        FABContent {
+            navController.navigate(ReaderScreens.SearchScreen.name)
+        }
     }) { values ->
         Surface(
             modifier = Modifier
