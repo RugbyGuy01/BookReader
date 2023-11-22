@@ -2,9 +2,11 @@ package com.golfpvcc.bookreader.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.golfpvcc.bookreader.screens.ReaderSplashScreen
 import com.golfpvcc.bookreader.screens.details.BookDetailsScreen
 import com.golfpvcc.bookreader.screens.home.Home
@@ -17,32 +19,43 @@ import com.golfpvcc.bookreader.screens.update.BookUpdateScreen
 @Composable
 fun ReaderNavigation() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = ReaderScreens.ReaderHomeScreen.name ){
-        composable(ReaderScreens.SplashScreen.name){
+    NavHost(navController = navController, startDestination = ReaderScreens.ReaderHomeScreen.name) {
+        composable(ReaderScreens.SplashScreen.name) {
             ReaderSplashScreen(navController = navController)
         }
-        composable(ReaderScreens.LoginScreen.name){
+        composable(ReaderScreens.LoginScreen.name) {
             ReaderLoginScreen(navController = navController)
         }
-        composable(ReaderScreens.ReaderStatsScreen.name){
+        composable(ReaderScreens.ReaderStatsScreen.name) {
             ReaderStatsScreen(navController = navController)
         }
 
-        composable(ReaderScreens.ReaderHomeScreen.name){
+        composable(ReaderScreens.ReaderHomeScreen.name) {
             Home(navController = navController)
         }
-        composable(ReaderScreens.SearchScreen.name){
+        composable(ReaderScreens.SearchScreen.name) {
             val searchViewModel = hiltViewModel<BookSearchViewModel>()
             SearchScreen(navController = navController, searchViewModel)
         }
-        composable(ReaderScreens.DetailScreen.name){
-            BookDetailsScreen(navController = navController)
-        }
-        composable(ReaderScreens.UpdateScreen.name){
+        composable(ReaderScreens.UpdateScreen.name) {
             BookUpdateScreen(navController = navController)
         }
-        composable(ReaderScreens.ReaderStatsScreen.name){
+        composable(ReaderScreens.ReaderStatsScreen.name) {
             ReaderStatsScreen(navController = navController)
         }
+
+        val detailName = ReaderScreens.DetailScreen.name
+        composable(
+            "$detailName/{bookId}", arguments = listOf(
+                navArgument("bookId") {
+                    type = NavType.StringType
+                })
+        ) { backStackEntry ->
+            backStackEntry.arguments?.getString("bookId").let {
+                BookDetailsScreen(navController = navController, bookId = it.toString())
+            }
+
+        }
+
     }
 }

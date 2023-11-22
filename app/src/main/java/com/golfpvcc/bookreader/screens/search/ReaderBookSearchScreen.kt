@@ -1,8 +1,10 @@
 package com.golfpvcc.bookreader.screens.search
 
 import android.annotation.SuppressLint
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -20,7 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
+
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +38,8 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -88,8 +92,11 @@ fun BookList(navController: NavController, viewModel: BookSearchViewModel = hilt
 //    if(viewModel.listOfBooks.value.loading == true)
     //          CircularProgressIndicator()
     val listOfBooks = viewModel.list
-    if(viewModel.isLoading){
-        LinearProgressIndicator()
+    if (viewModel.isLoading) {
+        Row(horizontalArrangement = Arrangement.SpaceBetween) {
+            LinearProgressIndicator()
+            Text(text = "Searching book info")
+        }
     } else {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -109,9 +116,11 @@ fun BookRow(
 ) {
 
     Card(modifier = Modifier
-        .clickable { }
+        .clickable {
+            navController.navigate(ReaderScreens.DetailScreen.name + "/${book.id}")
+        }
         .fillMaxWidth()
-        .height(100.dp)
+        .height(120.dp) // vinnie 11/21/2023
         .padding(3.dp),
         shape = RectangleShape,
         elevation = CardDefaults.cardElevation(
@@ -138,10 +147,25 @@ fun BookRow(
             Column() {
                 Text(text = book.volumeInfo.title, overflow = TextOverflow.Ellipsis)
                 Text(
-                    text = "Author: ${book.volumeInfo.authors}", overflow = TextOverflow.Clip,
+                    text = "Author: ${book.volumeInfo.authors}",
+                    overflow = TextOverflow.Clip,
+                    fontStyle = FontStyle.Italic,
                     style = MaterialTheme.typography.labelSmall
                 )
                 // doto add more fields later
+                Text(
+                    text = "Date: ${book.volumeInfo.publishedDate}",
+                    overflow = TextOverflow.Clip,
+                    fontStyle = FontStyle.Italic,
+                    style = MaterialTheme.typography.labelSmall
+                )
+
+                Text(
+                    text = "${book.volumeInfo.categories}",
+                    overflow = TextOverflow.Clip,
+                    fontStyle = FontStyle.Italic,
+                    style = MaterialTheme.typography.labelSmall
+                )
             } // end of column
 
         } // end of row
