@@ -10,6 +10,7 @@ import androidx.navigation.navArgument
 import com.golfpvcc.bookreader.screens.ReaderSplashScreen
 import com.golfpvcc.bookreader.screens.details.BookDetailsScreen
 import com.golfpvcc.bookreader.screens.home.Home
+import com.golfpvcc.bookreader.screens.home.HomeScreenViewModel
 import com.golfpvcc.bookreader.screens.login.ReaderLoginScreen
 import com.golfpvcc.bookreader.screens.search.BookSearchViewModel
 import com.golfpvcc.bookreader.screens.search.SearchScreen
@@ -19,7 +20,7 @@ import com.golfpvcc.bookreader.screens.update.BookUpdateScreen
 @Composable
 fun ReaderNavigation() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = ReaderScreens.ReaderHomeScreen.name) {
+    NavHost(navController = navController, startDestination = ReaderScreens.LoginScreen.name) {
         composable(ReaderScreens.SplashScreen.name) {
             ReaderSplashScreen(navController = navController)
         }
@@ -31,15 +32,24 @@ fun ReaderNavigation() {
         }
 
         composable(ReaderScreens.ReaderHomeScreen.name) {
-            Home(navController = navController)
+            val homeViewModel = hiltViewModel<HomeScreenViewModel>()
+            Home(navController = navController, viewModel = homeViewModel)
         }
         composable(ReaderScreens.SearchScreen.name) {
             val searchViewModel = hiltViewModel<BookSearchViewModel>()
             SearchScreen(navController = navController, searchViewModel)
         }
-        composable(ReaderScreens.UpdateScreen.name) {
-            BookUpdateScreen(navController = navController)
+
+        val updateName = ReaderScreens.UpdateScreen.name
+        composable("$updateName/{bookItemId}",
+            arguments = listOf(navArgument("bookItemId") {
+                type = NavType.StringType
+            })) {navBackStackEntry ->  
+            navBackStackEntry.arguments?.getString("bookItemId").let{
+                BookUpdateScreen(navController = navController, bookItemId = it.toString())
+            }
         }
+
         composable(ReaderScreens.ReaderStatsScreen.name) {
             ReaderStatsScreen(navController = navController)
         }

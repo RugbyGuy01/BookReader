@@ -48,6 +48,7 @@ fun ReaderSplashScreen(navController: NavController) {
                 })
         )
         delay(2000L)
+
         var LogInStatus = FirebaseAuth.getInstance().currentUser?.email.isNullOrEmpty()
         if (LogInStatus )
             navController.navigate(ReaderScreens.LoginScreen.name)

@@ -246,12 +246,7 @@ fun ReaderAppBar(
 
 @Composable
 fun ListCard(
-    book: MBook = MBook(
-        id = "aass",
-        title = "running",
-        authors = "me & you,",
-        notes = "hello world"
-    ),
+    book: MBook,
     onPressDetail: (String) -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -282,7 +277,7 @@ fun ListCard(
         ) {
             Row(horizontalArrangement = Arrangement.Center) {
                 Image(
-                    painter = painter,
+                    painter = rememberAsyncImagePainter(model = book.photoUrl.toString()),
                     contentDescription = "Book image",
                     modifier = Modifier
                         .height(140.dp)

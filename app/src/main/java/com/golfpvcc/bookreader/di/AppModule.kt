@@ -2,7 +2,9 @@ package com.golfpvcc.bookreader.di
 
 import com.golfpvcc.bookreader.network.BooksApi
 import com.golfpvcc.bookreader.repository.BookRepository
+import com.golfpvcc.bookreader.repository.FireRespository
 import com.golfpvcc.bookreader.utils.Constants
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,6 +17,12 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+    @Singleton
+    @Provides
+    fun provideFireBookRepository()
+    = FireRespository(queryBook = FirebaseFirestore.getInstance()
+        .collection("books"))
+
     @Singleton
     @Provides
     fun provideBookRepository(api: BooksApi) = BookRepository(api)

@@ -1,6 +1,7 @@
 package com.golfpvcc.bookreader.screens.details
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.widget.Space
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -40,9 +41,13 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.golfpvcc.bookreader.ReaderApp
 import com.golfpvcc.bookreader.components.ReaderAppBar
+import com.golfpvcc.bookreader.components.RoundedButton
 import com.golfpvcc.bookreader.data.Resource
 import com.golfpvcc.bookreader.model.Item
+import com.golfpvcc.bookreader.model.MBook
 import com.golfpvcc.bookreader.navigation.ReaderScreens
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -150,6 +155,57 @@ fun ShowBookDetails(bookInfo: Resource<Item>, navController: NavController) {
                 Text(text = cleanDescription)
             }
         }
+
+    } // end of surface
+    // buttons
+    Row(
+        modifier = Modifier.padding(top = 6.dp),
+        horizontalArrangement = Arrangement.SpaceAround
+    ) {
+        RoundedButton(label = "Save") {
+            // save the book to the firestore database
+            val book = MBook(
+                title = bookData.title,
+                authors = bookData.authors.toString(),
+                description = bookData.description,
+                categories = bookData.categories.toString(),
+                notes = "",
+                photoUrl = bookData.imageLinks.thumbnail,
+                publishedDate = bookData.publishedDate,
+                pageCount = bookData.pageCount.toString(),
+                rating = "0.0",
+                googleBookId = googleBookId,
+                usderId = FirebaseAuth.getInstance().currentUser?.uid.toString()
+            )
+            saveToFirebase(book = book, navController = navController)
+        } // end of Button
+        Spacer(modifier = Modifier.width(25.dp))
+        RoundedButton(label = "Cancel") {
+            navController.popBackStack()
+        }
+    } //end of row
+}  // end of ShowBookDetails
+
+
+
+fun saveToFirebase(book: MBook, navController: NavController) {
+    val db = FirebaseFirestore.getInstance()
+    val dbCollection = db.collection("books")
+
+    if (book.toString().isNotEmpty()) {
+        dbCollection.add(book)
+            .addOnSuccessListener { documentRef ->
+                val docId = documentRef.id
+                dbCollection.document(docId)
+                    .update(hashMapOf("id" to docId) as Map<String, Any>)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful)
+                            navController.popBackStack()
+                    }.addOnFailureListener{
+                        Log.w("VIN", "SaveToFirebase: failed ", it)
+                    }
+            }
+    } else {
 
     }
 }

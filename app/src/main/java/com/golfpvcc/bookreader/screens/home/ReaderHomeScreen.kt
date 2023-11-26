@@ -1,35 +1,23 @@
 package com.golfpvcc.bookreader.screens.home
 
-import android.annotation.SuppressLint
-import android.graphics.Paint
-import androidx.compose.foundation.Image
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.rounded.FavoriteBorder
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardDefaults.cardElevation
-import androidx.compose.material3.CardElevation
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -50,13 +38,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
-import com.golfpvcc.bookreader.components.BookRating
 import com.golfpvcc.bookreader.components.FABContent
 import com.golfpvcc.bookreader.components.ListCard
 import com.golfpvcc.bookreader.components.ReaderAppBar
@@ -69,7 +54,10 @@ import com.golfpvcc.bookreader.model.MBook as MBook
 //@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Home(navController: NavController = NavController(LocalContext.current)) {
+fun Home(
+    navController: NavController = NavController(LocalContext.current),
+    viewModel: HomeScreenViewModel = hiltViewModel()
+) {
     val showProfile: Boolean = true
     val title: String = "A.Reader"
 
@@ -124,22 +112,31 @@ fun Home(navController: NavController = NavController(LocalContext.current)) {
                 .fillMaxSize()
                 .padding(values)
         ) {
-            HomeContent(navController)
+            HomeContent(navController, viewModel)
         }
     }
 }
 
 @Composable
-fun HomeContent(navController: NavController) {
-    val listOfBooks = listOf(
-        MBook(id = "dadfa", title = "Hello Again", authors = "All of us", notes = null),
-        MBook(id = "dadfa", title = " Again", authors = "All of us", notes = null),
-        MBook(id = "dadfa", title = "Hello ", authors = "The world us", notes = null),
-        MBook(id = "dadfa", title = "Hello Again", authors = "All of us", notes = null),
-        MBook(id = "dadfa", title = "Hello Again", authors = "All of us", notes = null)
-    )
+fun HomeContent(navController: NavController, viewModel: HomeScreenViewModel) {
+//    val listOfBooks = listOf(
+//        MBook(id = "dadfa", title = "Hello Again", authors = "All of us", notes = null),
+//        MBook(id = "dadfa", title = " Again", authors = "All of us", notes = null),
+//        MBook(id = "dadfa", title = "Hello ", authors = "The world us", notes = null),
+//        MBook(id = "dadfa", title = "Hello Again", authors = "All of us", notes = null),
+//        MBook(id = "dadfa", title = "Hello Again", authors = "All of us", notes = null)
+//    )
+    var listOfBooks = emptyList<MBook>()
+    val currentUser = FirebaseAuth.getInstance().currentUser
 
-        var email = FirebaseAuth . getInstance ().currentUser?.email
+    if(!viewModel.data.value.data.isNullOrEmpty()){
+        listOfBooks = viewModel.data.value.data!!.toList().filter { mBook ->
+            mBook.usderId == currentUser?.uid.toString()
+        }
+        Log.d("VIN",  "HomeCotent: ${listOfBooks.toString()}" )
+    }
+
+    var email = FirebaseAuth.getInstance().currentUser?.email
     val currentUserName = if (!email.isNullOrEmpty())
         email?.split("@")?.get(0)
     else
@@ -172,7 +169,7 @@ fun HomeContent(navController: NavController) {
                 Divider()
             }
         }   // end of row
-        ReadingRightNowArea(books = listOf(), navController = navController)
+        ReadingRightNowArea(listOfBooks = listOf(), navController = navController)
         TitleSection(label = "Reading List")
         BookListArea(listOfBooks = listOfBooks, navController = navController)
     }
@@ -185,7 +182,7 @@ fun BookListArea(
 ) {
 
     HorizontalScrollableComponent(listOfBooks) {
-        // ToDO: on Card Click navigate to details
+        navController.navigate(ReaderScreens.UpdateScreen.name + "/$it")
     }
 }
 
@@ -204,7 +201,7 @@ fun HorizontalScrollableComponent(
     ) {
         for (book in listOfBooks) {
             ListCard(book) {
-                onCardPresses(it)
+                onCardPresses(book.googleBookId.toString())
 
             }
         }
@@ -214,9 +211,16 @@ fun HorizontalScrollableComponent(
 
 @Composable
 fun ReadingRightNowArea(
-    books: List<MBook>,
+    listOfBooks: List<MBook>,
     navController: NavController
 ) {
-    ListCard()
+    //Filter books by reading now
+    val readingNowList = listOfBooks.filter { mBook ->
+        mBook.startedReading != null && mBook.finishedReading == null
+    }
+    HorizontalScrollableComponent(readingNowList){
+        Log.d("TAG", "BoolListArea: $it")
+        navController.navigate(ReaderScreens.UpdateScreen.name + "/$it")
+    }
 }
 
