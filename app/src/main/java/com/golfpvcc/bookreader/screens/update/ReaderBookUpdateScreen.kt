@@ -20,6 +20,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CardElevation
@@ -31,6 +33,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -41,18 +44,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.golfpvcc.bookreader.R
 import com.golfpvcc.bookreader.components.InputField
+import com.golfpvcc.bookreader.components.RatingBar
 import com.golfpvcc.bookreader.components.ReaderAppBar
+import com.golfpvcc.bookreader.components.RoundedButton
+import com.golfpvcc.bookreader.components.showToast
 import com.golfpvcc.bookreader.data.DataOrException
 import com.golfpvcc.bookreader.model.MBook
+import com.golfpvcc.bookreader.navigation.ReaderScreens
 import com.golfpvcc.bookreader.screens.home.HomeScreenViewModel
+import com.golfpvcc.bookreader.utils.formatDate
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,7 +82,7 @@ fun BookUpdateScreen(
             showProfile = false,
             navController = navController
         ) {
-            navController.popBackStack()
+            navController.navigate(ReaderScreens.ReaderHomeScreen.name)
         }
 
     }) { values ->
@@ -125,7 +138,7 @@ fun BookUpdateScreen(
 fun ShowSimpleForm(book: MBook, navController: NavController) {
 
     val notesText = remember {
-        mutableStateOf("")
+        mutableStateOf(book.notes)
     }
     val isStartedReading = remember {
         mutableStateOf(false)
@@ -133,6 +146,11 @@ fun ShowSimpleForm(book: MBook, navController: NavController) {
     val isFinishedReading = remember {
         mutableStateOf(false)
     }
+    val ratingVal = remember {
+        mutableStateOf(book.rating?.toInt())
+    }
+    val context = LocalContext.current
+
     SimpleForm(
         Modifier,
         defaultVules = if (book.notes.toString().isNotEmpty()) book.notes.toString()
@@ -147,7 +165,7 @@ fun ShowSimpleForm(book: MBook, navController: NavController) {
         horizontalArrangement = Arrangement.Start
     ) {
         TextButton(
-            onClick = {isStartedReading.value = true },
+            onClick = { isStartedReading.value = true },
             enabled = book.startedReading == null
         ) {
 
@@ -162,12 +180,12 @@ fun ShowSimpleForm(book: MBook, navController: NavController) {
                     )
                 }
             } else {
-                Text(text = "Started on: ${book.startedReading}") // format for date
+                Text(text = "Started on: ${formatDate(book.startedReading!!)}") // format for date
             }
-        }   // end of row
+        }   // end of button  row
         Spacer(modifier = Modifier.height(4.dp))
         TextButton(
-            onClick = {isFinishedReading.value = true },
+            onClick = { isFinishedReading.value = true },
             enabled = book.finishedReading == null
         ) {
 
@@ -182,9 +200,99 @@ fun ShowSimpleForm(book: MBook, navController: NavController) {
                     )
                 }
             } else {
-                Text(text = "Finished on: ${book.finishedReading}") // format for date
+                Text(text = "Finished on: ${formatDate(book.finishedReading!!)}") // format for date
             }
         }
+    }   // end of row
+    Text(text = "Rating", modifier = Modifier.padding(bottom = 3.dp))
+    book.rating?.toInt().let {bookRating ->
+        RatingBar(rating = bookRating!!) { rating ->
+            ratingVal.value = rating
+            Log.d("VIN", "ShowSimpleForm: ${ratingVal.value}")
+        }
+    }
+    Spacer(modifier = Modifier.padding(15.dp))
+    Row {
+        val changedNotes = book.notes != notesText.value
+        val changedRating = book.rating?.toInt() != ratingVal.value
+        val isStartedTimeStamp =
+            if (isStartedReading.value) Timestamp.now() else book.startedReading
+        val isFinishedTimeStamp =
+            if (isFinishedReading.value) Timestamp.now() else book.finishedReading
+        val bookUpdate =
+            changedNotes || changedRating || isStartedReading.value || isFinishedReading.value
+
+        val bookToUpdate = hashMapOf(
+            "finished_reading_at" to isFinishedTimeStamp,
+            "started_reading_at" to isStartedTimeStamp,
+            "rating" to ratingVal.value,
+            "notes" to notesText.value
+        ).toMap()
+
+        RoundedButton(label = "Update") {
+            Log.d("Data","changedNotes: $changedNotes changedRating $changedRating" )
+            Log.d("Data","isStartedTimeStamp: ${isStartedTimeStamp?.toDate()} isFinishedTimeStamp ${isFinishedTimeStamp?.toDate()}" )
+            if (bookUpdate) {
+                FirebaseFirestore.getInstance()
+                    .collection("books")
+                    .document(book.id!!)
+                    .update(bookToUpdate)
+                    .addOnCompleteListener {
+                        showToast(context, "Book updated Successfully!")
+                    }
+                    .addOnFailureListener {
+                        Log.d("VIN", "Error simepla form:", it)
+                    }
+            } else {
+                showToast(context, "Nothing to updated.")
+            }
+            navController.navigate(ReaderScreens.ReaderHomeScreen.name)
+        }
+        Spacer(modifier = Modifier.width(100.dp))
+        val openDialog = remember { mutableStateOf(false) }
+        if (openDialog.value) {
+            ShowAlertDialog(
+                message = stringResource(id = R.string.sure) + "\n" +
+                        stringResource(id = R.string.action),
+                openDialog
+            ) {
+                FirebaseFirestore.getInstance()
+                    .collection("books")
+                    .document(book.id!!)
+                    .delete()
+                    .addOnCompleteListener {
+                        if (it.isSuccessful) {
+                            openDialog.value = false
+                            navController.navigate(ReaderScreens.ReaderHomeScreen.name)
+                        }
+                    }
+            }
+        }
+        RoundedButton(label = "Delete") {
+            openDialog.value = true
+        }
+    }
+}
+
+@Composable
+fun ShowAlertDialog(
+    message: String,
+    openDialog: MutableState<Boolean>,
+    onYesPressed: () -> Unit
+) {
+
+    if (openDialog.value) {
+        AlertDialog(onDismissRequest = { openDialog.value = false },
+            title = { Text(text = "Delete Book") },
+            text = { Text(text = message) },
+            confirmButton = {
+                Button(onClick = onYesPressed) {
+                    Text(text = "Yes")
+                }
+                Button(onClick = { openDialog.value = false }) {
+                    Text(text = "No")
+                }
+            })
     }
 }
 

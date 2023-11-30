@@ -45,6 +45,7 @@ import com.golfpvcc.bookreader.R
 import com.golfpvcc.bookreader.components.EmailInput
 import com.golfpvcc.bookreader.components.PasswordInput
 import com.golfpvcc.bookreader.components.ReaderLogo
+import com.golfpvcc.bookreader.components.showToast
 import com.golfpvcc.bookreader.navigation.ReaderScreens
 
 
@@ -72,7 +73,7 @@ fun ReaderLoginScreen(
                         navController.navigate(ReaderScreens.ReaderHomeScreen.name)
                     else {
                         Log.w("VIN", "Login $loginResult")
-                        Toast.makeText(context, "Login $loginResult", Toast.LENGTH_LONG).show()
+                        showToast(context, "Login $loginResult")
                     }
                 }
             }

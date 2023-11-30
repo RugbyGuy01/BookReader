@@ -119,21 +119,17 @@ fun Home(
 
 @Composable
 fun HomeContent(navController: NavController, viewModel: HomeScreenViewModel) {
-//    val listOfBooks = listOf(
-//        MBook(id = "dadfa", title = "Hello Again", authors = "All of us", notes = null),
-//        MBook(id = "dadfa", title = " Again", authors = "All of us", notes = null),
-//        MBook(id = "dadfa", title = "Hello ", authors = "The world us", notes = null),
-//        MBook(id = "dadfa", title = "Hello Again", authors = "All of us", notes = null),
-//        MBook(id = "dadfa", title = "Hello Again", authors = "All of us", notes = null)
-//    )
     var listOfBooks = emptyList<MBook>()
     val currentUser = FirebaseAuth.getInstance().currentUser
 
     if(!viewModel.data.value.data.isNullOrEmpty()){
         listOfBooks = viewModel.data.value.data!!.toList().filter { mBook ->
-            mBook.usderId == currentUser?.uid.toString()
+            mBook.userId == currentUser?.uid.toString()
         }
-        Log.d("VIN",  "HomeCotent: ${listOfBooks.toString()}" )
+        Log.d("DATA",  "HomeCotent list books: ${listOfBooks.toString()}" )
+    } else
+    {
+        Log.d("DATA",  "HomeCotent isNullOrEmpty" )
     }
 
     var email = FirebaseAuth.getInstance().currentUser?.email

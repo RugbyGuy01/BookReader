@@ -168,14 +168,14 @@ fun ShowBookDetails(bookInfo: Resource<Item>, navController: NavController) {
                 title = bookData.title,
                 authors = bookData.authors.toString(),
                 description = bookData.description,
-                categories = bookData.categories.toString(),
+                categories = bookData.categories?.toString(),
                 notes = "",
                 photoUrl = bookData.imageLinks.thumbnail,
                 publishedDate = bookData.publishedDate,
                 pageCount = bookData.pageCount.toString(),
-                rating = "0.0",
+                rating = 0.0,
                 googleBookId = googleBookId,
-                usderId = FirebaseAuth.getInstance().currentUser?.uid.toString()
+                userId = FirebaseAuth.getInstance().currentUser?.uid.toString()
             )
             saveToFirebase(book = book, navController = navController)
         } // end of Button
