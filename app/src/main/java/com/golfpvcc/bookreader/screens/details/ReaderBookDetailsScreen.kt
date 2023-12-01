@@ -166,13 +166,13 @@ fun ShowBookDetails(bookInfo: Resource<Item>, navController: NavController) {
             // save the book to the firestore database
             val book = MBook(
                 title = bookData.title,
-                authors = bookData.authors.toString(),
+                authors = bookData.authors?.toString(),
                 description = bookData.description,
                 categories = bookData.categories?.toString(),
                 notes = "",
                 photoUrl = bookData.imageLinks.thumbnail,
                 publishedDate = bookData.publishedDate,
-                pageCount = bookData.pageCount.toString(),
+                pageCount = bookData.pageCount?.toString(),
                 rating = 0.0,
                 googleBookId = googleBookId,
                 userId = FirebaseAuth.getInstance().currentUser?.uid.toString()

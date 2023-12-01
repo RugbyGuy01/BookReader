@@ -22,6 +22,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -63,44 +64,39 @@ fun Home(
 
     Scaffold(topBar = {
         ReaderAppBar(title = "A.Reader", navController = navController)
-        TopAppBar(
-            title = {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (showProfile) {
-                        Icon(
-                            imageVector = Icons.Default.Favorite,
-                            contentDescription = "Logo Icon",
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
-                                .scale(scale = 0.9f)
-                        )
-                    }
-                    Text(
-                        text = title,
-                        color = Color.Red.copy(alpha = 0.7f),
-                        style = TextStyle(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp
-                        )
+        TopAppBar(title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (showProfile) {
+                    Icon(
+                        imageVector = Icons.Default.Favorite,
+                        contentDescription = "Logo Icon",
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .scale(scale = 0.9f)
                     )
                 }
-            },
-            actions = {
-                IconButton(onClick = {
-                    FirebaseAuth.getInstance().signOut().run {
-                        navController.navigate(ReaderScreens.LoginScreen.name)
-                    }
-                }) {
-                    Icon(
-                        Icons.Default.Close, contentDescription = null,
-                        tint = Color.Green.copy(alpha = 0.4f)
-                    )        // log out Icon
+                Text(
+                    text = title, color = Color.Red.copy(alpha = 0.7f), style = TextStyle(
+                        fontWeight = FontWeight.Bold, fontSize = 20.sp
+                    )
+                )
+            }
+        }, actions = {
+            IconButton(onClick = {
+                FirebaseAuth.getInstance().signOut().run {
+                    navController.navigate(ReaderScreens.LoginScreen.name)
                 }
-            },
-            colors = TopAppBarDefaults.mediumTopAppBarColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                titleContentColor = MaterialTheme.colorScheme.primary,
-            )
+            }) {
+                Icon(
+                    Icons.Default.Close,
+                    contentDescription = null,
+                    tint = Color.Green.copy(alpha = 0.4f)
+                )        // log out Icon
+            }
+        }, colors = TopAppBarDefaults.mediumTopAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            titleContentColor = MaterialTheme.colorScheme.primary,
+        )
         )
     }, floatingActionButton = {
         FABContent {
@@ -122,25 +118,21 @@ fun HomeContent(navController: NavController, viewModel: HomeScreenViewModel) {
     var listOfBooks = emptyList<MBook>()
     val currentUser = FirebaseAuth.getInstance().currentUser
 
-    if(!viewModel.data.value.data.isNullOrEmpty()){
+    if (!viewModel.data.value.data.isNullOrEmpty()) {
         listOfBooks = viewModel.data.value.data!!.toList().filter { mBook ->
             mBook.userId == currentUser?.uid.toString()
         }
-        Log.d("DATA",  "HomeCotent list books: ${listOfBooks.toString()}" )
-    } else
-    {
-        Log.d("DATA",  "HomeCotent isNullOrEmpty" )
+        Log.d("DATA", "HomeCotent list books: ${listOfBooks.toString()}")
+    } else {
+        Log.d("DATA", "HomeCotent isNullOrEmpty")
     }
 
     var email = FirebaseAuth.getInstance().currentUser?.email
-    val currentUserName = if (!email.isNullOrEmpty())
-        email?.split("@")?.get(0)
-    else
-        "N/A"
+    val currentUserName = if (!email.isNullOrEmpty()) email?.split("@")?.get(0)
+    else "N/A"
 
     Column(
-        Modifier.padding(2.dp),
-        verticalArrangement = Arrangement.Top
+        Modifier.padding(2.dp), verticalArrangement = Arrangement.Top
     ) {
         Row(modifier = Modifier.align(alignment = Alignment.Start)) {        // row here
             TitleSection(label = "Your reading \n " + "activity right now ...")
@@ -165,19 +157,25 @@ fun HomeContent(navController: NavController, viewModel: HomeScreenViewModel) {
                 Divider()
             }
         }   // end of row
-        ReadingRightNowArea(listOfBooks = listOf(), navController = navController)
+        ReadingRightNowArea(
+            listOfBooks = listOfBooks,
+            navController = navController
+        )
         TitleSection(label = "Reading List")
+
         BookListArea(listOfBooks = listOfBooks, navController = navController)
     }
 }
 
 @Composable
 fun BookListArea(
-    listOfBooks: List<MBook>,
-    navController: NavController
+    listOfBooks: List<MBook>, navController: NavController
 ) {
+    val addedBooks = listOfBooks.filter { mBook ->
+        mBook.startedReading == null && mBook.finishedReading == null
+    }
 
-    HorizontalScrollableComponent(listOfBooks) {
+    HorizontalScrollableComponent(addedBooks) {
         navController.navigate(ReaderScreens.UpdateScreen.name + "/$it")
     }
 }
@@ -185,6 +183,7 @@ fun BookListArea(
 @Composable
 fun HorizontalScrollableComponent(
     listOfBooks: List<MBook>,
+    viewModel: HomeScreenViewModel = hiltViewModel(),
     onCardPresses: (String) -> Unit
 ) {
     val scrollState = rememberScrollState()
@@ -195,28 +194,42 @@ fun HorizontalScrollableComponent(
             .height(280.dp)
             .horizontalScroll(scrollState)
     ) {
-        for (book in listOfBooks) {
-            ListCard(book) {
-                onCardPresses(book.googleBookId.toString())
-
-            }
+        if (viewModel.data.value.loading == true) {
+            LinearProgressIndicator()
+        } else {
+            if (listOfBooks.isNullOrEmpty()) {
+                Surface(modifier = Modifier.padding(23.dp)) {
+                    Text(
+                        text = "No books found. Add a Book",
+                        style = TextStyle(
+                            color = Color.Red.copy(alpha = 0.4f),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
+                    )
+                }
+            } else {
+                for (book in listOfBooks) {
+                    ListCard(book) {
+                        onCardPresses(book.googleBookId.toString())
+                    }
+                } // end of For
+            }  // end of else
         }
     }
 }
 
-
-@Composable
-fun ReadingRightNowArea(
-    listOfBooks: List<MBook>,
-    navController: NavController
-) {
-    //Filter books by reading now
-    val readingNowList = listOfBooks.filter { mBook ->
-        mBook.startedReading != null && mBook.finishedReading == null
+    @Composable
+    fun ReadingRightNowArea(    // ?? stop at 5:26
+        listOfBooks: List<MBook>, navController: NavController
+    ) {
+        //Filter books by reading now
+        val readingNowList = listOfBooks.filter { mBook ->
+            mBook.startedReading != null && mBook.finishedReading == null
+        }
+        HorizontalScrollableComponent(readingNowList) {
+            Log.d("TAG", "BoolListArea: $it")
+            navController.navigate(ReaderScreens.UpdateScreen.name + "/$it")
+        }
     }
-    HorizontalScrollableComponent(readingNowList){
-        Log.d("TAG", "BoolListArea: $it")
-        navController.navigate(ReaderScreens.UpdateScreen.name + "/$it")
-    }
-}
 
