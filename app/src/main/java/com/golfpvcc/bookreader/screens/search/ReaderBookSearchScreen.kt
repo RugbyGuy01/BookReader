@@ -132,10 +132,16 @@ fun BookRow(
             modifier = Modifier.padding(5.dp),
             verticalAlignment = Alignment.Top
         ) {
-            val imageUrl: String = if (book.volumeInfo.imageLinks.smallThumbnail.isEmpty() == true)
-                ""
-            else
-                book.volumeInfo.imageLinks.smallThumbnail
+            val imageUrl: String
+            if (book.volumeInfo?.imageLinks != null) {
+                imageUrl =
+                    if (book.volumeInfo?.imageLinks?.smallThumbnail?.isEmpty() == true)
+                        ""
+                    else
+                        book.volumeInfo.imageLinks.smallThumbnail
+            } else
+                imageUrl = ""
+
             Image(
                 painter = rememberAsyncImagePainter(model = imageUrl),
                 contentDescription = "Book image",
@@ -144,6 +150,7 @@ fun BookRow(
                     .width(80.dp)
                     .padding(4.dp)
             )
+
             Column() {
                 Text(text = book.volumeInfo.title, overflow = TextOverflow.Ellipsis)
                 Text(

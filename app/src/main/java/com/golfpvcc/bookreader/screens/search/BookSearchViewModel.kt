@@ -40,7 +40,7 @@ class BookSearchViewModel @Inject constructor(private val repository: BookReposi
                     }
 
                     is Resource.Error -> {
-                        Log.e("Network", "Search Books failed")
+                        Log.e("VIN", "Search Books failed")
                         isLoading = false
                     }
 
@@ -49,7 +49,7 @@ class BookSearchViewModel @Inject constructor(private val repository: BookReposi
 
             } catch (exception: Exception) {
                 isLoading = false
-                Log.d("Network", "Search Books: ${exception.message.toString()}")
+                Log.d("VIN", "Search Books: ${exception.message.toString()}")
             }
         }
     }

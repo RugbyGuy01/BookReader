@@ -312,7 +312,7 @@ fun ListCard(
                         contentDescription = "Fav Icon",
                         modifier = Modifier.padding(bottom = 1.dp)
                     )
-                    BookRating(3.5)
+                    BookRating(book.rating!!)
                 } // end column
             }   // end row first row - picture and rating
             Text(
